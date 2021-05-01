@@ -46,14 +46,18 @@
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
 		</dependency>
-		<!-- <dependency> <groupId>com.h2database</groupId> <artifactId>h2</artifactId> 
-			<scope>runtime</scope> </dependency> -->
-		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<!-- <dependency> <groupId>org.postgresql</groupId> <artifactId>postgresql</artifactId> 
+			</dependency> -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -78,6 +82,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
 	</dependencies>
 
 	<build>

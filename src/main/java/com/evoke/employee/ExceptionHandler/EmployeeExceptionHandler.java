@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-
 import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -30,7 +28,14 @@ public class EmployeeExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(RecordNotFoundException ex, Locale locale) {
         List<String> errorList = new ArrayList<String>();
         errorList.add(ex.getMessage());
-    	return new ResponseEntity<>(new ErrorResponse(HttpStatus.NOT_FOUND.toString(),errorList), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.NOT_FOUND.toString(), errorList), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidIdFormatExeption.class)
+    public ResponseEntity<ErrorResponse> InvalidEmployee(InvalidIdFormatExeption ex, Locale locale) {
+        List<String> errorList = new ArrayList<String>();
+        errorList.add(ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), errorList), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,22 +45,24 @@ public class EmployeeExceptionHandler {
                 .stream()
                 .map(objectError -> messageSource.getMessage(objectError, locale))
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.toString(),errorMessages), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), errorMessages), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleExceptions(Exception ex, Locale locale) {
         String errorMessage = "Unexpected Error occured";
-        String error =HttpStatus.INTERNAL_SERVER_ERROR.toString();
+        String error = HttpStatus.INTERNAL_SERVER_ERROR.toString();
         if (ex instanceof ConstraintViolationException) {
-        	error = HttpStatus.BAD_REQUEST.toString();
-        	errorMessage = (((ConstraintViolationException) ex).getConstraintViolations()).iterator().next().getMessage();
+            error = HttpStatus.BAD_REQUEST.toString();
+            errorMessage = (((ConstraintViolationException) ex).getConstraintViolations()).iterator()
+                    .next()
+                    .getMessage();
         } else {
             errorMessage = ex.getMessage();
-        } 
+        }
         ex.printStackTrace();
         List<String> errorList = new ArrayList<String>();
         errorList.add(errorMessage);
-        return new ResponseEntity<>(new ErrorResponse(error,errorList), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new ErrorResponse(error, errorList), HttpStatus.INTERNAL_SERVER_ERROR);
     }
-} 
+}

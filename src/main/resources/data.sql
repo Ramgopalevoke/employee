@@ -6,7 +6,9 @@ CREATE TABLE Employee (
   email VARCHAR(250) NOT NULL,
   phone VARCHAR(13) DEFAULT NULL,
   created_by VARCHAR(250) NOT NULL,
-  created_on TIMESTAMP NOT NULL
+  created_on TIMESTAMP NOT NULL,
+  updated_by VARCHAR(250) NULL,
+  updated_on TIMESTAMP
 );
 
 INSERT INTO Employee (name, email, phone, created_by, created_on) VALUES
