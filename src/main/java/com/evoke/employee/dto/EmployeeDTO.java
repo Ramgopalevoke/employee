@@ -20,6 +20,8 @@ public class EmployeeDTO {
         this.phone = phone;
     }
 
+    public EmployeeDTO() {}
+
     public int getId() {
         return id;
     }

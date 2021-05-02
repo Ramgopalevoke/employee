@@ -3,8 +3,6 @@ package com.evoke.employee.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
@@ -33,8 +31,6 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "evoke/v1")
 public class EmployeeController {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     EmployeeService empService;
 
@@ -45,14 +41,11 @@ public class EmployeeController {
     @GetMapping("/allemployees")
     public ResponseEntity<List<EmployeeDTO>> getAllEmployeeDetails() throws Exception {
 
-        LOGGER.info("Entered into Get All employees method");
 
         List<EmployeeDTO> empDTOList = empService.getAllEmployeeDetails()
                 .stream()
                 .map(emp -> new EmployeeDTO(emp.getId(), emp.getName(), emp.getEmail(), emp.getPhone()))
                 .collect(Collectors.toList());
-
-        LOGGER.info("Before Getting response from All employees method");
 
         return new ResponseEntity<>(empDTOList, HttpStatus.OK);
     }

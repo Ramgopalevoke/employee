@@ -22,6 +22,10 @@ public class SaveEmployeeDTO {
         this.phone = phone;
     }
 
+    public SaveEmployeeDTO() {
+        // TODO Auto-generated constructor stub
+    }
+
     @NotNull(message = "Please provide employee name")
     @NotEmpty(message = "Please provide employee name")
     @Size(max = 250, message = "Name should be less than 250 characters")

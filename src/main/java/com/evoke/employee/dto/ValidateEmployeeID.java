@@ -11,6 +11,10 @@ public class ValidateEmployeeID {
         this.id = id;
     }
 
+    public ValidateEmployeeID() {
+        // TODO Auto-generated constructor stub
+    }
+
     @NotNull(message = "Please provide  employee id")
     @NotEmpty(message = "Please provide employee id")
     // @Pattern(regexp = "([a-zA-Z]+)", message = "employee id should be numeric")

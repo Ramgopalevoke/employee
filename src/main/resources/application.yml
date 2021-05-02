@@ -8,6 +8,7 @@ spring:
     h2:
      console:
        enabled: true
+
 #spring:
 #    datasource:
 #          url: jdbc:postgresql://localhost:5432/EMPLOYEE_DB
@@ -24,6 +25,9 @@ server:
     error:
        include-message: always
        include-binding-errors: always
+local:
+   server:
+       port: 8080
        
 logging:
   file: logs/application-debug.log
