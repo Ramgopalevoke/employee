@@ -1,0 +1,17 @@
+spring:
+    datasource:
+          url: jdbc:postgresql://localhost:5432/EMPLOYEE_DB
+          username: postgres
+          password: evoke123
+    jpa:
+      database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+      properties:
+           hibernate:
+                format_sql: true
+
+server:
+    error:
+       include-message: always
+       include-binding-errors: always
+    port: 8080
+

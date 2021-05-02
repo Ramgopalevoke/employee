@@ -40,7 +40,7 @@ public class EmployeeExceptionHandler {
     public ResponseEntity<ErrorResponse> InvalidEmployee(InvalidIdFormatExeption ex, Locale locale) {
         List<String> errorList = new ArrayList<String>();
         errorList.add(ex.getMessage());
-        Logger.error("Invalid Input:", ex.getMessage());
+        Logger.error("Invalid Input:" + ex.getMessage(), ex.getMessage());
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), errorList), HttpStatus.BAD_REQUEST);
     }
 
@@ -51,7 +51,7 @@ public class EmployeeExceptionHandler {
                 .stream()
                 .map(objectError -> messageSource.getMessage(objectError, locale))
                 .collect(Collectors.toList());
-        Logger.error("Method Argument Not Valid:", ex.getMessage());
+        Logger.error("Method Argument Not Valid:" + ex.getMessage(), ex.getMessage());
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), errorMessages), HttpStatus.BAD_REQUEST);
     }
 
@@ -64,11 +64,11 @@ public class EmployeeExceptionHandler {
             errorMessage = (((ConstraintViolationException) ex).getConstraintViolations()).iterator()
                     .next()
                     .getMessage();
-            Logger.error("Constraint Violation:", ex.getMessage());
+            Logger.error("Constraint Violation:" + ex.getMessage(), ex.getMessage());
 
         } else {
             errorMessage = ex.getMessage();
-            Logger.error("System Error:", ex.getMessage());
+            Logger.error("System Error:" + ex.getMessage(), ex.getMessage());
         }
         ex.printStackTrace();
         List<String> errorList = new ArrayList<String>();

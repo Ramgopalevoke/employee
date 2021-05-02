@@ -1,5 +1,6 @@
 package com.evoke.employee.controller;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -45,6 +46,7 @@ public class EmployeeController {
         List<EmployeeDTO> empDTOList = empService.getAllEmployeeDetails()
                 .stream()
                 .map(emp -> new EmployeeDTO(emp.getId(), emp.getName(), emp.getEmail(), emp.getPhone()))
+                .sorted(Comparator.comparing(EmployeeDTO::getId))
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(empDTOList, HttpStatus.OK);
