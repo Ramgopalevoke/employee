@@ -29,8 +29,8 @@ public class SaveEmployeeDTO {
         // TODO Auto-generated constructor stub
     }
 
-    @NotNull(message = "Please provide employee name")
-    @NotEmpty(message = "Please provide employee name")
+    @NotNull(message = "Please provide employee first name")
+    @NotEmpty(message = "Please provide employee first name")
     @Size(max = 250, message = "Name should be less than 250 characters")
     private String firstName;
     @NotNull(message = "Please provide employee last name")
