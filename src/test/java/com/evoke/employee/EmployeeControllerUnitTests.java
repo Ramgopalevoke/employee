@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +40,9 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
     @Test
     public void testAddEmployee() throws Exception {
         SaveEmployeeDTO empDto = new SaveEmployeeDTO();
-        empDto.setName("Rohit");
-        empDto.setEmail("rohit@evoketechnologies.com");
+        empDto.setFirstName("Rohit");
+        empDto.setLastName("Sharma");
+        empDto.setEmail("rohit1@evoketechnologies.com");
         empDto.setPhone("0000000000");
         when(empCon.addEmployeeDetails(empDto)).thenReturn(new ResponseEntity<String>(HttpStatus.CREATED));
         ResponseEntity<String> responseEntity = this.restTemplate.postForEntity("http://localhost:" + port + "/evoke/v1/employee/enroll", empDto, String.class);
@@ -48,7 +51,7 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
 
     @Test
     public void testAddEmployeeWithBadRequest() throws Exception {
-        SaveEmployeeDTO empDto = new SaveEmployeeDTO("Rohit", "String", "String");
+        SaveEmployeeDTO empDto = new SaveEmployeeDTO("Rohit", "Sharma", "String", "String");
         List<String> messages = new ArrayList<String>();
         messages.add("Please enter valid phone number");
         messages.add("Please enter valid email address");
@@ -74,6 +77,12 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
                 .size() == 5);
     }
 
+    @Test
+    public void testGetAllEmployeesWithDepartment() throws Exception {
+        when(empCon.getAllEmployeeAndDepatmentDetails()).thenReturn(new ResponseEntity<Stream<HashMap<String, String>>>(HttpStatus.OK));
+        assertTrue(this.restTemplate.getForObject("http://localhost:" + port + "/evoke/v1/allemployeeswithdepartments", List.class)
+                .size() == 5);
+    }
 
     @Test
     public void testUpdateEmployeeWithBadRequest() throws Exception {
@@ -107,7 +116,7 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
 
     @Test
     public void testUpdateEmployee() throws Exception {
-        UpdateEmpDTO empDto = new UpdateEmpDTO("RohitUpdate", "rohitUpdate@evoketechnologies.com", "1000000000");
+        UpdateEmpDTO empDto = new UpdateEmpDTO("RohitUpdate", "SharmaUpdate", "rohitUpdate@evoketechnologies.com", "1000000000");
         ValidateEmployeeID valId = new ValidateEmployeeID();
         valId.setId("5");
         when(empCon.editEmployeeDetails(empDto, valId)).thenReturn(new ResponseEntity<String>(HttpStatus.OK));
@@ -118,7 +127,7 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
 
     @Test
     public void testUpdateEmployeeWithNotFound() throws Exception {
-        UpdateEmpDTO empDto = new UpdateEmpDTO("RohitUpdate", "rohitUpdate@evoketechnologies.com", "1000000000");
+        UpdateEmpDTO empDto = new UpdateEmpDTO("RohitUpdate", "SharmaUpdate", "rohitUpdate@evoketechnologies.com", "1000000000");
 
         ValidateEmployeeID valId = new ValidateEmployeeID();
         valId.setId("100");
@@ -138,7 +147,7 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
         assertEquals(200, responseEntity.getStatusCodeValue());
         EmployeeDTO emp = responseEntity.getBody();
         assertTrue(5 == emp.getId());
-        assertTrue("RohitUpdate".equals(emp.getName()));
+        assertTrue("ROHITUPDATE SHARMAUPDATE".equals(emp.getName()));
         assertTrue("rohitUpdate@evoketechnologies.com".equals(emp.getEmail()));
         assertTrue("1000000000".equals(emp.getPhone()));
     }
@@ -186,6 +195,15 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
         when(empCon.deleteEmployeeDetails(valId)).thenReturn(new ResponseEntity<String>(HttpStatus.OK));
 
         ResponseEntity<String> responseEntity = this.restTemplate.exchange("http://localhost:" + port + "/evoke/v1/employee/1", HttpMethod.DELETE, null, String.class);
+        assertEquals(200, responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    public void testEmployeeCountForDep() throws Exception {
+
+        when(empCon.getEmpCountForDepartments()).thenReturn(new ResponseEntity<Stream<HashMap<String, String>>>(HttpStatus.OK));
+
+        ResponseEntity<List> responseEntity = this.restTemplate.getForEntity("http://localhost:" + port + "/evoke/v1/getEmpCountsByDept", List.class);
         assertEquals(200, responseEntity.getStatusCodeValue());
     }
 }

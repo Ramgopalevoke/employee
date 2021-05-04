@@ -2,10 +2,13 @@ package com.evoke.employee.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.evoke.employee.entity.Department;
 import com.evoke.employee.entity.Employee;
+import com.evoke.employee.repository.DepartmentRepository;
 import com.evoke.employee.repository.EmployeeRepository;
 import com.evoke.employee.service.EmployeeService;
 
@@ -14,6 +17,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     EmployeeRepository empRepo;
+
+    @Autowired
+    DepartmentRepository depRepo;
 
     @Override
     public List<Employee> getAllEmployeeDetails() {
@@ -28,12 +34,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public String deleteEmployeeDetails(int id) {
+        Optional<Department> dep = depRepo.findById(id);
+        if (dep.isPresent())
+            depRepo.delete((Department) dep.get());
         empRepo.deleteById(id);
         return "employee.deleted";
     }
 
     @Transactional
     public String saveEmployeeDetails(Employee emp) {
+        emp.setName(emp.getFirstName()
+                .toUpperCase() + " "
+                + emp.getLastName()
+                        .toUpperCase());
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
         empRepo.save(emp);
@@ -42,10 +55,20 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public String updateEmployeeDetails(Employee emp) {
+        emp.setName(emp.getFirstName()
+                .toUpperCase() + " "
+                + emp.getLastName()
+                        .toUpperCase());
         emp.setUpdatedBy("System");
         emp.setUpdatedOn(new Date());
         empRepo.saveAndFlush(emp);
         return "employee.edit.success";
+    }
+
+    @Override
+    public Employee employeeEmailCheck(String email) {
+        return empRepo.findByEmail(email)
+                .orElse(null);
     }
 
 }

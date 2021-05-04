@@ -8,6 +8,8 @@ public interface EmployeeService {
 
     Employee getEmployeeDetails(int id);
 
+    Employee employeeEmailCheck(String email);
+
     public String deleteEmployeeDetails(int id);
 
     public String saveEmployeeDetails(Employee emp);

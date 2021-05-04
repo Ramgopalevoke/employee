@@ -1,11 +1,14 @@
 package com.evoke.employee.entity;
 
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 
@@ -19,6 +22,10 @@ public class Employee {
     private int id;
     @Column(name = "name")
     private String name;
+    @Column(name = "first_name")
+    private String firstName;
+    @Column(name = "last_name")
+    private String lastName;
     @Column(name = "email")
     private String email;
     @Column(name = "phone")
@@ -32,13 +39,18 @@ public class Employee {
     @Column(name = "updated_by")
     private String updatedBy;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "id")
+    private Department department;
+
     public Employee() {
         super();
     }
 
-    public Employee(String name, String email, String phone) {
+    public Employee(String firstName, String lastName, String email, String phone) {
         super();
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.phone = phone;
     }
@@ -107,5 +119,28 @@ public class Employee {
         this.updatedBy = updatedBy;
     }
 
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
 }
