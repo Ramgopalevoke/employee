@@ -33,7 +33,7 @@ public class UpdateEmpDTO {
     @Size(max = 13, message = "Phone number should be less than 13 characters")
     @Pattern(regexp = "(^$|[0-9]{10})", message = "Please enter valid phone number")
     private String phone;
-    @Pattern(regexp = "(^$|[0-9])", message = "Please enter valid department id")
+    // @Pattern(regexp = "(^$|[0-9])", message = "Please enter valid department id")
     Integer depId;
     String dateOfJoining;
 

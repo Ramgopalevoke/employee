@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
@@ -33,6 +34,7 @@ public class Employee {
     private String email;
     @Column(name = "phone")
     private String phone;
+    @JsonIgnore
     @Column(name = "doj")
     private Date doj;
     @JsonIgnore
@@ -53,6 +55,7 @@ public class Employee {
     @JoinColumn(name = "dep_id", referencedColumnName = "dep_id")
     private Department department;
 
+    @Transient
     private String DateOfJoining;
 
     public Employee() {

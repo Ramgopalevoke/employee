@@ -38,10 +38,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public String saveEmployeeDetails(Employee emp) {
-        emp.setName(emp.getFirstName()
-                .toUpperCase() + " "
-                + emp.getLastName()
-                        .toUpperCase());
+        emp.setName(String.join(emp.getFirstName()
+                .toUpperCase(), " ",
+                emp.getLastName()
+                        .toUpperCase()));
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
         System.out.println("--->>" + emp.getDepId());
@@ -53,10 +53,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public String updateEmployeeDetails(Employee emp) {
-        emp.setName(emp.getFirstName()
-                .toUpperCase() + " "
-                + emp.getLastName()
-                        .toUpperCase());
+        emp.setName(String.join(emp.getFirstName()
+                .toUpperCase(), " ",
+                emp.getLastName()
+                        .toUpperCase()));
         emp.setUpdatedBy("System");
         emp.setUpdatedOn(new Date());
         empRepo.saveAndFlush(emp);
