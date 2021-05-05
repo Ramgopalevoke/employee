@@ -1,15 +1,16 @@
 package com.evoke.employee.entity;
 
 import java.util.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
@@ -20,6 +21,8 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
+    @Column(name = "dep_id", insertable = false, updatable = false)
+    private int depId;
     @Column(name = "name")
     private String name;
     @Column(name = "first_name")
@@ -30,29 +33,41 @@ public class Employee {
     private String email;
     @Column(name = "phone")
     private String phone;
+    @Column(name = "doj")
+    private Date doj;
+    @JsonIgnore
     @Column(name = "created_on")
     private Date createdOn;
+    @JsonIgnore
     @Column(name = "created_by")
     private String createdBy;
+    @JsonIgnore
     @Column(name = "updated_on")
     private Date updatedOn;
+    @JsonIgnore
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "id")
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dep_id", referencedColumnName = "dep_id")
     private Department department;
+
+    private String DateOfJoining;
 
     public Employee() {
         super();
     }
 
-    public Employee(String firstName, String lastName, String email, String phone) {
+    public Employee(String firstName, String lastName, String email, String phone, Date doj, int depId, Department department) {
         super();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
+        this.doj = doj;
+        this.depId = depId;
+        this.department = department;
     }
 
     public int getId() {
@@ -85,6 +100,22 @@ public class Employee {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public int getDepId() {
+        return depId;
+    }
+
+    public void setDepId(int depId) {
+        this.depId = depId;
+    }
+
+    public Date getDoj() {
+        return doj;
+    }
+
+    public void setDoj(Date doj) {
+        this.doj = doj;
     }
 
     public String getCreatedBy() {
@@ -141,6 +172,14 @@ public class Employee {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getDateOfJoining() {
+        return DateOfJoining;
+    }
+
+    public void setDateOfJoining(String dateOfJoining) {
+        DateOfJoining = dateOfJoining;
     }
 
 }

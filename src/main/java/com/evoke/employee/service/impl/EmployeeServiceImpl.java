@@ -2,11 +2,9 @@ package com.evoke.employee.service.impl;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.evoke.employee.entity.Department;
 import com.evoke.employee.entity.Employee;
 import com.evoke.employee.repository.DepartmentRepository;
 import com.evoke.employee.repository.EmployeeRepository;
@@ -34,9 +32,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public String deleteEmployeeDetails(int id) {
-        Optional<Department> dep = depRepo.findById(id);
-        if (dep.isPresent())
-            depRepo.delete((Department) dep.get());
         empRepo.deleteById(id);
         return "employee.deleted";
     }
@@ -49,6 +44,9 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .toUpperCase());
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
+        System.out.println("--->>" + emp.getDepId());
+        // emp.setDepartment(depRepo.findById(emp.getDepId())
+        // .get());
         empRepo.save(emp);
         return "employee.save.success";
     }

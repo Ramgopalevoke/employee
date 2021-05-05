@@ -33,7 +33,9 @@ public class UpdateEmpDTO {
     @Size(max = 13, message = "Phone number should be less than 13 characters")
     @Pattern(regexp = "(^$|[0-9]{10})", message = "Please enter valid phone number")
     private String phone;
-
+    @Pattern(regexp = "(^$|[0-9])", message = "Please enter valid department id")
+    Integer depId;
+    String dateOfJoining;
 
     public String getFirstName() {
         return firstName;
@@ -67,6 +69,21 @@ public class UpdateEmpDTO {
         this.phone = phone;
     }
 
+    public Integer getDepId() {
+        return depId;
+    }
+
+    public void setDepId(Integer depId) {
+        this.depId = depId;
+    }
+
+    public String getDateOfJoining() {
+        return dateOfJoining;
+    }
+
+    public void setDateOfJoining(String dateOfJoining) {
+        this.dateOfJoining = dateOfJoining;
+    }
 
     public Employee UpdateEmpObject(Employee emp, UpdateEmpDTO empDTO) {
         emp.setEmail(empDTO.getEmail() != null && !"".equals(empDTO.getEmail()

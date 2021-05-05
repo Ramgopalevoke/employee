@@ -9,4 +9,9 @@ import com.evoke.employee.entity.Employee;
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     Optional<Employee> findByEmail(String email);
+
+    /*
+     * @Query("SELECT d.depName, COUNT(d.depId) FROM Employee AS e, Dep GROUP BY d.name ORDER BY d.name DESC"
+     * ) List<Object[]> countEmployeesForDepartment();
+     */
 }

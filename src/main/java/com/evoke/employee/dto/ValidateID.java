@@ -5,18 +5,18 @@ import javax.validation.constraints.NotNull;
 import com.evoke.employee.ExceptionHandler.InvalidIdFormatExeption;
 
 
-public class ValidateEmployeeID {
+public class ValidateID {
 
-    public ValidateEmployeeID(String id) {
+    public ValidateID(String id) {
         this.id = id;
     }
 
-    public ValidateEmployeeID() {
+    public ValidateID() {
         // TODO Auto-generated constructor stub
     }
 
-    @NotNull(message = "Please provide  employee id")
-    @NotEmpty(message = "Please provide employee id")
+    @NotNull(message = "Please provide id")
+    @NotEmpty(message = "Please provide id")
     // @Pattern(regexp = "([a-zA-Z]+)", message = "employee id should be numeric")
     private String id;
 
@@ -24,7 +24,7 @@ public class ValidateEmployeeID {
         if (id.matches("^[0-9]*$"))
             return Integer.valueOf(id);
         else
-            throw new InvalidIdFormatExeption("employee id should be numeric");
+            throw new InvalidIdFormatExeption("id should be numeric");
     }
 
     public void setId(String id) {
