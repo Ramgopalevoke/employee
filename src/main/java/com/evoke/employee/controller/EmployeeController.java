@@ -1,12 +1,13 @@
 package com.evoke.employee.controller;
 
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
@@ -22,13 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.evoke.employee.ExceptionHandler.InvalidIdFormatExeption;
 import com.evoke.employee.ExceptionHandler.RecordNotFoundException;
-import com.evoke.employee.dto.SaveEmployeeDTO;
-import com.evoke.employee.dto.UpdateEmpDTO;
-import com.evoke.employee.dto.ValidateID;
-import com.evoke.employee.entity.Department;
+import com.evoke.employee.dto.EmployeeDTO;
 import com.evoke.employee.entity.Employee;
 import com.evoke.employee.service.DepartmentService;
 import com.evoke.employee.service.EmployeeService;
+import io.micrometer.core.lang.NonNull;
 import io.swagger.annotations.ApiOperation;
 
 @CrossOrigin
@@ -44,70 +43,81 @@ public class EmployeeController {
     DepartmentService depService;
 
     @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
     private ReloadableResourceBundleMessageSource messageSource;
 
-    SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 
-    @ApiOperation(value = "Get All Employee Details", tags = "Employee Service")
+    @ApiOperation(value = "Get All Employee Details")
     @GetMapping("/allemployees")
     public ResponseEntity<List<Employee>> getAllEmployeeDetails() throws Exception {
 
         return new ResponseEntity<>(empService.getAllEmployeeDetails()
                 .stream()
-                .map((emp) -> {
-                    emp.setDateOfJoining(formatter.format(emp.getDoj()));
-                    return emp;
-                })
                 .sorted(Comparator.comparing(Employee::getId))
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Add Employee Details", tags = "Employee Service")
+    @ApiOperation(value = "Add Employee Details")
     @PostMapping("/employee/enroll")
-    public ResponseEntity<String> addEmployeeDetails(@Valid @RequestBody SaveEmployeeDTO empDTO) throws Exception {
+    public ResponseEntity<String> addEmployeeDetails(@Valid @RequestBody EmployeeDTO empDTO) throws Exception {
         if (empService.employeeEmailCheck(empDTO.getEmail()) != null)
             throw new InvalidIdFormatExeption(messageSource.getMessage("employee.email.exist", new Object[] {empDTO.getEmail()}, null));
-        Department dep = depService.getDepartmentDetails(empDTO.getDepId());
+        var dep = depService.getDepartmentDetails(empDTO.getDepId());
         if (dep == null)
             throw new InvalidIdFormatExeption(messageSource.getMessage("department.id.notexist", new Object[] {empDTO.getDepId()}, null));
 
-        return new ResponseEntity<>(messageSource.getMessage(empService.saveEmployeeDetails(new Employee(empDTO.getFirstName(), empDTO.getLastName(), empDTO.getEmail(),
-                empDTO.getPhone(), formatter.parse(empDTO.getDateOfJoining()), empDTO.getDepId(), dep)), new Object[] {empDTO.getEmail()}, null), HttpStatus.CREATED);
+        empDTO.setDepartment(dep);
+        mapper.getConfiguration()
+                .setAmbiguityIgnored(true);
+        return new ResponseEntity<>(messageSource.getMessage(empService.saveEmployeeDetails(mapper.map(empDTO, Employee.class)), new Object[] {empDTO.getEmail()}, null),
+                HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Update Employee Details", tags = "Employee Service")
+    @ApiOperation(value = "Update Employee Details")
     @PostMapping("/employee/{id}")
-    public ResponseEntity<String> editEmployeeDetails(@Valid @RequestBody UpdateEmpDTO empDTO, @Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Employee emp = empService.getEmployeeDetails(validId.getId());
+    public ResponseEntity<String> editEmployeeDetails(@Valid @RequestBody EmployeeDTO empDTO, @NonNull @NotEmpty @PathVariable(name = "id") String id) throws Exception {
+
+        var emp = empService.getEmployeeDetails(validateId(id));
+        var dep = depService.getDepartmentDetails(empDTO.getDepId());
         if (emp == null)
-            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {validId.getId()}, null));
-        if (depService.getDepartmentDetails(empDTO.getDepId()) == null)
+            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {id}, null));
+        if (dep == null)
             throw new InvalidIdFormatExeption(messageSource.getMessage("department.id.notexist", new Object[] {empDTO.getDepId()}, null));
-        emp = empDTO.UpdateEmpObject(emp, empDTO);
-        return new ResponseEntity<>(messageSource.getMessage(empService.updateEmployeeDetails(emp), new Object[] {emp.getName()}, null), HttpStatus.OK);
+
+        empDTO.setId(emp.getId());
+        empDTO.setCreatedOn(emp.getCreatedOn());
+        empDTO.setCreatedBy(emp.getCreatedBy());
+        empDTO.setDepartment(dep);
+
+        mapper.getConfiguration()
+                .setAmbiguityIgnored(true);
+        return new ResponseEntity<>(messageSource.getMessage(empService.updateEmployeeDetails(mapper.map(empDTO, Employee.class)), new Object[] {emp.getName()}, null),
+                HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get Employee Details based on id", tags = "Employee Service")
+    @ApiOperation(value = "Get Employee Details based on id")
     @GetMapping("/employee/{id}")
-    public ResponseEntity<Employee> getEmployeeDetails(@Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Employee emp = empService.getEmployeeDetails(validId.getId());
+    public ResponseEntity<Employee> getEmployeeDetails(@Valid @NonNull @NotEmpty @PathVariable(name = "id") String id) throws Exception {
+        var emp = empService.getEmployeeDetails(validateId(id));
         if (emp == null)
-            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {validId.getId()}, null));
+            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {id}, null));
 
         return new ResponseEntity<>(emp, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Delete Employee Details", tags = "Employee Service")
+    @ApiOperation(value = "Delete Employee Details")
     @DeleteMapping("/employee/{id}")
-    public ResponseEntity<String> deleteEmployeeDetails(@Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Employee emp = empService.getEmployeeDetails(validId.getId());
+    public ResponseEntity<String> deleteEmployeeDetails(@Valid @NonNull @NotEmpty @PathVariable(name = "id") String id) throws Exception {
+        var emp = empService.getEmployeeDetails(validateId(id));
         if (emp == null)
-            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {validId.getId()}, null));
+            throw new RecordNotFoundException(messageSource.getMessage("employee.notfound", new Object[] {id}, null));
 
-        return new ResponseEntity<>(messageSource.getMessage(empService.deleteEmployeeDetails(validId.getId()), new Object[] {validId.getId()}, null), HttpStatus.OK);
+        return new ResponseEntity<>(messageSource.getMessage(empService.deleteEmployeeDetails(emp), new Object[] {id}, null), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get All Employee Details with departments", tags = "Employee Service")
+    @ApiOperation(value = "Get All Employee Details with departments")
     @GetMapping("/allemployeeswithdepartments")
     public ResponseEntity<Stream<HashMap<String, String>>> getAllEmployeeAndDepatmentDetails() throws Exception {
 
@@ -118,7 +128,7 @@ public class EmployeeController {
                 .map((emp) -> {
                     HashMap<String, String> hp = new HashMap<String, String>();
                     hp.put("employee name", emp.getName());
-                    hp.put("date of joining", formatter.format(emp.getDoj()));
+                    hp.put("date of joining", emp.getJoiningDate());
                     hp.put("department name", emp.getDepartment() != null ? emp.getDepartment()
                             .getDepName() : "");
                     return hp;
@@ -127,5 +137,11 @@ public class EmployeeController {
         return new ResponseEntity<>(empDTOListOp, HttpStatus.OK);
     }
 
+    public int validateId(String id) {
+        if (!(id.matches("^[0-9]*$")))
+            throw new InvalidIdFormatExeption("Employee id should be numeric");
+        else
+            return Integer.valueOf(id);
+    }
 
 }

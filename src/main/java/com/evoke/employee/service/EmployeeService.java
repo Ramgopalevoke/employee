@@ -10,7 +10,7 @@ public interface EmployeeService {
 
     Employee employeeEmailCheck(String email);
 
-    public String deleteEmployeeDetails(int id);
+    public String deleteEmployeeDetails(Employee emp);
 
     public String saveEmployeeDetails(Employee emp);
 

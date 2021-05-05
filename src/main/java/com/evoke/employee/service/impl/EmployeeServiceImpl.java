@@ -31,8 +31,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Transactional
-    public String deleteEmployeeDetails(int id) {
-        empRepo.deleteById(id);
+    public String deleteEmployeeDetails(Employee emp) {
+        empRepo.delete(emp);
         return "employee.deleted";
     }
 
@@ -44,9 +44,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .toUpperCase()));
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
-        System.out.println("--->>" + emp.getDepId());
-        // emp.setDepartment(depRepo.findById(emp.getDepId())
-        // .get());
         empRepo.save(emp);
         return "employee.save.success";
     }

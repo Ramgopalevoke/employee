@@ -1,5 +1,7 @@
 package com.evoke.employee.entity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "Employee")
 public class Employee {
 
+    @Transient
+    SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -34,9 +39,10 @@ public class Employee {
     private String email;
     @Column(name = "phone")
     private String phone;
-    @JsonIgnore
     @Column(name = "doj")
-    private Date doj;
+    private Date joiningDate;
+    @Column(name = "password")
+    private String password;
     @JsonIgnore
     @Column(name = "created_on")
     private Date createdOn;
@@ -55,22 +61,8 @@ public class Employee {
     @JoinColumn(name = "dep_id", referencedColumnName = "dep_id")
     private Department department;
 
-    @Transient
-    private String DateOfJoining;
-
     public Employee() {
         super();
-    }
-
-    public Employee(String firstName, String lastName, String email, String phone, Date doj, int depId, Department department) {
-        super();
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phone = phone;
-        this.doj = doj;
-        this.depId = depId;
-        this.department = department;
     }
 
     public int getId() {
@@ -113,12 +105,17 @@ public class Employee {
         this.depId = depId;
     }
 
-    public Date getDoj() {
-        return doj;
+
+    public String getJoiningDate() {
+        return formatter.format(joiningDate);
     }
 
-    public void setDoj(Date doj) {
-        this.doj = doj;
+    public void setJoiningDate(String joiningDate) {
+        try {
+            this.joiningDate = formatter.parse(joiningDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getCreatedBy() {
@@ -177,12 +174,12 @@ public class Employee {
         this.lastName = lastName;
     }
 
-    public String getDateOfJoining() {
-        return DateOfJoining;
+    public String getPassword() {
+        return password;
     }
 
-    public void setDateOfJoining(String dateOfJoining) {
-        DateOfJoining = dateOfJoining;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

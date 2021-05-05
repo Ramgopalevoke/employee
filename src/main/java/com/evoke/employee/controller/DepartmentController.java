@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.evoke.employee.ExceptionHandler.InvalidIdFormatExeption;
 import com.evoke.employee.ExceptionHandler.RecordNotFoundException;
 import com.evoke.employee.dto.DepartmentDTO;
-import com.evoke.employee.dto.ValidateID;
 import com.evoke.employee.entity.Department;
 import com.evoke.employee.service.DepartmentService;
+import io.micrometer.core.lang.NonNull;
 import io.swagger.annotations.ApiOperation;
 
 @CrossOrigin
@@ -40,8 +42,10 @@ public class DepartmentController {
     @Autowired
     private ReloadableResourceBundleMessageSource messageSource;
 
+    @Autowired
+    private ModelMapper mapper;
 
-    @ApiOperation(value = "Get All Departments", tags = "Department Service")
+    @ApiOperation(value = "Get All Departments")
     @GetMapping("/allDepartments")
     public ResponseEntity<List<Department>> getAllDepartmentDetails() throws Exception {
 
@@ -51,55 +55,62 @@ public class DepartmentController {
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Add Department", tags = "Department Service")
+    @ApiOperation(value = "Add Department")
     @PostMapping("/addDepartment")
     public ResponseEntity<String> addDepartmentDetails(@Valid @RequestBody DepartmentDTO depDTO) throws Exception {
-        if (depService.departmentByName(depDTO.getDepartmentName()) != null)
-            throw new InvalidIdFormatExeption(messageSource.getMessage("department.name.exist", new Object[] {depDTO.getDepartmentName()}, null));
+        if (depService.departmentByName(depDTO.getDepName()) != null)
+            throw new InvalidIdFormatExeption(messageSource.getMessage("department.name.exist", new Object[] {depDTO.getDepName()}, null));
 
-        return new ResponseEntity<>(messageSource.getMessage(depService.saveDepartment(new Department(depDTO.getDepartmentName(), depDTO.getDescription())),
-                new Object[] {depDTO.getDepartmentName()}, null), HttpStatus.CREATED);
+        return new ResponseEntity<>(messageSource.getMessage(depService.saveDepartment(mapper.map(depDTO, Department.class)), new Object[] {depDTO.getDepName()}, null),
+                HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Update Depatment", tags = "Department Service")
-    @PostMapping("/department/{id}")
-    public ResponseEntity<String> editDepartmentDetails(@Valid @RequestBody DepartmentDTO depDTO, @Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Department dep = depService.getDepartmentDetails(validId.getId());
+    @ApiOperation(value = "Update Depatment")
+    @PostMapping("/department/{depId}")
+    public ResponseEntity<String> editDepartmentDetails(@Valid @RequestBody DepartmentDTO depDTO, @NonNull @NotEmpty @PathVariable(name = "depId") String depId) throws Exception {
+        var dep = depService.getDepartmentDetails(validateDepId(depId));
         if (dep == null)
-            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {validId.getId()}, null));
-        dep = depDTO.UpdateDepDTO(dep, depDTO);
-        return new ResponseEntity<>(messageSource.getMessage(depService.updateDepartment(dep), new Object[] {depDTO.getDepartmentName()}, null), HttpStatus.OK);
+            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {depId}, null));
+        if (depService.departmentByName(depDTO.getDepName()) != null)
+            throw new InvalidIdFormatExeption(messageSource.getMessage("department.name.exist", new Object[] {depDTO.getDepName()}, null));
+
+        depDTO.setDepId(dep.getDepId());
+        depDTO.setCreatedBy(dep.getCreatedBy());
+        depDTO.setCreatedOn(dep.getCreatedOn());
+
+        return new ResponseEntity<>(messageSource.getMessage(depService.updateDepartment(mapper.map(depDTO, Department.class)), new Object[] {depDTO.getDepName()}, null),
+                HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Get Department based on id", tags = "Department Service")
-    @GetMapping("/department/{id}")
-    public ResponseEntity<DepartmentDTO> getDepartmentDetails(@Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Department dep = depService.getDepartmentDetails(validId.getId());
+    @ApiOperation(value = "Get Department based on depId")
+    @GetMapping("/department/{depId}")
+    public ResponseEntity<Department> getDepartmentDetails(@NonNull @NotEmpty @PathVariable(name = "depId") String depId) throws Exception {
+        var dep = depService.getDepartmentDetails(validateDepId(depId));
         if (dep == null)
-            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {validId.getId()}, null));
+            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {depId}, null));
 
-        return new ResponseEntity<>(new DepartmentDTO(dep.getDepId(), dep.getDepName(), dep.getDescription()), HttpStatus.OK);
+        return new ResponseEntity<>(dep, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Delete Department", tags = "Department Service")
-    @DeleteMapping("/department/{id}")
-    public ResponseEntity<String> deleteDepartmentDetails(@Valid @PathVariable(name = "id") ValidateID validId) throws Exception {
-        Department dep = depService.getDepartmentDetails(validId.getId());
+    @ApiOperation(value = "Delete Department")
+    @DeleteMapping("/department/{depId}")
+    public ResponseEntity<String> deleteDepartmentDetails(@NonNull @NotEmpty @PathVariable(name = "depId") String depId) throws Exception {
+        var dep = depService.getDepartmentDetails(validateDepId(depId));
         if (dep == null)
-            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {validId.getId()}, null));
+            throw new RecordNotFoundException(messageSource.getMessage("department.notfound", new Object[] {depId}, null));
 
-        return new ResponseEntity<>(messageSource.getMessage(depService.deleteDepartment(dep), new Object[] {validId.getId()}, null), HttpStatus.OK);
+        return new ResponseEntity<>(messageSource.getMessage(depService.deleteDepartment(dep), new Object[] {depId}, null), HttpStatus.OK);
     }
 
 
-    @ApiOperation(value = "Get Employees count respective departments", tags = "Department Service")
+    @ApiOperation(value = "Get Employees count respective departments")
     @GetMapping("/getEmpCountsByDept")
     public ResponseEntity<Stream<HashMap<String, Object>>> getEmpCountForDepartments() throws Exception {
 
         List<Department> depCntList = depService.getAllDepartments();
         Stream<HashMap<String, Object>> depCntListOp = depCntList.stream()
                 .map((obj) -> {
-                    HashMap<String, Object> hp = new HashMap<String, Object>();
+                    HashMap<String, Object> hp = new HashMap<>();
                     hp.put("deptName", obj.getDepName());
                     hp.put("count", obj.getEmployees()
                             .size());
@@ -107,5 +118,12 @@ public class DepartmentController {
                 });
 
         return new ResponseEntity<>(depCntListOp, HttpStatus.OK);
+    }
+
+    public int validateDepId(String depId) {
+        if (!(depId.matches("^[0-9]*$")))
+            throw new InvalidIdFormatExeption("Department Id should be numeric");
+        else
+            return Integer.valueOf(depId);
     }
 }
