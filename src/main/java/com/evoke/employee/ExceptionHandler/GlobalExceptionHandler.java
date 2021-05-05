@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,14 +19,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 @ControllerAdvice
-public class EmployeeExceptionHandler {
+public class GlobalExceptionHandler {
 
     private final Logger Logger = LoggerFactory.getLogger(this.getClass());
 
     private final MessageSource messageSource;
 
     @Autowired
-    public EmployeeExceptionHandler(MessageSource messageSource) {
+    public GlobalExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
@@ -76,12 +75,6 @@ public class EmployeeExceptionHandler {
                     .next()
                     .getMessage();
             Logger.error("Constraint Violation:" + ex.getMessage(), ex.getMessage());
-        } else if (ex instanceof DataIntegrityViolationException) {
-            error = HttpStatus.BAD_REQUEST.toString();
-            errorMessage = ex.getMessage();
-            Logger.error("Data Integrity Violation:" + ex.getMessage(), ex.getMessage());
-
-
         } else {
             errorMessage = ex.getMessage();
             ex.printStackTrace();
