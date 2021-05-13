@@ -1,39 +1,44 @@
 package com.evoke.employee.utility;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import com.evoke.employee.entity.Employee;
 
-public class EmployeeExcelExporter {
-    private XSSFWorkbook workbook;
-    private XSSFSheet sheet;
+public class EmployeeExcelExporter implements EmployeeExporter {
+    private HSSFWorkbook workbook;
+    private HSSFSheet sheet;
     private List<Employee> listEmployees;
     private String docName;
 
     public EmployeeExcelExporter(List<Employee> listUsers, String docName) {
         this.listEmployees = listUsers;
         this.docName = docName;
-        workbook = new XSSFWorkbook();
+        workbook = new HSSFWorkbook();
     }
 
 
     private void writeHeaderLine() {
-        sheet = workbook.createSheet("Employees");
 
+        CreationHelper creationHelper = workbook.getCreationHelper();
+        sheet = workbook.createSheet("Employees");
         Row row = sheet.createRow(0);
 
         CellStyle style = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
+        HSSFFont font = workbook.createFont();
         font.setBold(true);
-        font.setFontHeight(16);
         style.setFont(font);
 
         createCell(row, 0, "Employee ID", style);
@@ -61,8 +66,7 @@ public class EmployeeExcelExporter {
         int rowCount = 1;
 
         CellStyle style = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontHeight(14);
+        HSSFFont font = workbook.createFont();
         style.setFont(font);
 
         for (Employee Employee : listEmployees) {
@@ -79,19 +83,22 @@ public class EmployeeExcelExporter {
         }
     }
 
-    public void export(HttpServletResponse response) throws IOException {
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=" + docName + ".xlsx";
-        response.setHeader(headerKey, headerValue);
+    public ResponseEntity<InputStreamResource> export() throws IOException {
 
         writeHeaderLine();
         writeDataLines();
 
-        ServletOutputStream outputStream = response.getOutputStream();
-        workbook.write(outputStream);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
         workbook.close();
 
-        outputStream.close();
+        out.close();
+        HttpHeaders headers = new HttpHeaders();
 
+        headers.add("Content-Disposition", "attachment; filename=" + docName + ".xlsx");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE))
+                .body(new InputStreamResource(new ByteArrayInputStream(out.toByteArray())));
     }
 }

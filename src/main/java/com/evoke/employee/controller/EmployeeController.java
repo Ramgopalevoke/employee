@@ -9,6 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -132,11 +133,13 @@ public class EmployeeController {
         return new ResponseEntity<>(empDTOListOp, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Export Employee details")
     @GetMapping("/employee/export/{format}")
-    public void exportToExcel(HttpServletResponse response, @NonNull @NotEmpty @PathVariable(name = "format") String format) throws Exception {
+    public ResponseEntity<InputStreamResource> exportToExcel(HttpServletResponse response, @NonNull @NotEmpty @PathVariable(name = "format") String format) throws Exception {
 
         List<Employee> listUsers = empService.getAllEmployeeDetails();
-        new EmployeeExporterFactory(listUsers, format).export(response);
+        return new EmployeeExporterFactory(listUsers, format).getExporter()
+                .export();
     }
 
     public int validateId(String id) {

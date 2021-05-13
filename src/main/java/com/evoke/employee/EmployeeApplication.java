@@ -57,7 +57,6 @@ public class EmployeeApplication implements CommandLineRunner {
             admin.setJoiningDate("24-Apr-2021");
             admin.setPassword("admin");
             admin.setEmail("admin@email.com");
-            // admin.setRoles(new ArrayList<Role>(Arrays.asList(Role.ROLE_ADMIN)));
 
             empService.saveEmployeeDetails(admin);
             logger.debug("Created admin employee successfully");
