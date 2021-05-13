@@ -1,8 +1,5 @@
 package com.evoke.employee.controller;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -29,8 +26,7 @@ import com.evoke.employee.dto.EmployeeDTO;
 import com.evoke.employee.entity.Employee;
 import com.evoke.employee.service.DepartmentService;
 import com.evoke.employee.service.EmployeeService;
-import com.evoke.employee.utility.EmployeeExcelExporter;
-import com.evoke.employee.utility.EmployeePDFExporter;
+import com.evoke.employee.utility.EmployeeExporterFactory;
 import io.micrometer.core.lang.NonNull;
 import io.swagger.annotations.ApiOperation;
 
@@ -138,30 +134,9 @@ public class EmployeeController {
 
     @GetMapping("/employee/export/{format}")
     public void exportToExcel(HttpServletResponse response, @NonNull @NotEmpty @PathVariable(name = "format") String format) throws Exception {
-        response.setContentType("application/octet-stream");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
 
         List<Employee> listUsers = empService.getAllEmployeeDetails();
-        String DocName = "employees_" + currentDateTime;
-        if ("excel".equals(format)) {
-            String headerKey = "Content-Disposition";
-            String headerValue = "attachment; filename=" + DocName + ".xlsx";
-            response.setHeader(headerKey, headerValue);
-            EmployeeExcelExporter excelExporter = new EmployeeExcelExporter(listUsers);
-
-            excelExporter.export(response);
-        } else if ("PDF".equals(format)) {
-
-            String headerKey = "Content-Disposition";
-            String headerValue = "attachment; filename=" + DocName + ".pdf";
-            response.setHeader(headerKey, headerValue);
-            EmployeePDFExporter PDFExporter = new EmployeePDFExporter(listUsers);
-
-            PDFExporter.export(response);
-
-        }
-
+        new EmployeeExporterFactory(listUsers, format).export(response);
     }
 
     public int validateId(String id) {

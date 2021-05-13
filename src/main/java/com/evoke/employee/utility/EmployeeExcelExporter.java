@@ -16,9 +16,11 @@ public class EmployeeExcelExporter {
     private XSSFWorkbook workbook;
     private XSSFSheet sheet;
     private List<Employee> listEmployees;
+    private String docName;
 
-    public EmployeeExcelExporter(List<Employee> listUsers) {
+    public EmployeeExcelExporter(List<Employee> listUsers, String docName) {
         this.listEmployees = listUsers;
+        this.docName = docName;
         workbook = new XSSFWorkbook();
     }
 
@@ -78,6 +80,10 @@ public class EmployeeExcelExporter {
     }
 
     public void export(HttpServletResponse response) throws IOException {
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=" + docName + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
         writeHeaderLine();
         writeDataLines();
 

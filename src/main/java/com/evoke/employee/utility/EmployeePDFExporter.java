@@ -10,14 +10,20 @@ import com.evoke.employee.entity.Employee;
 
 public class EmployeePDFExporter {
     private List<Employee> listEmployees;
+    private String docName;
 
-    public EmployeePDFExporter(List<Employee> listUsers) {
+    public EmployeePDFExporter(List<Employee> listUsers, String docName) {
         this.listEmployees = listUsers;
+        this.docName = docName;
     }
 
 
 
     public void export(HttpServletResponse response) throws DocumentException, IOException {
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=" + docName + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
         PDDocument doc = new PDDocument();
         PDPage page = new PDPage();
         doc.addPage(page);
