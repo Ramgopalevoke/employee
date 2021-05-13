@@ -1,10 +1,12 @@
 package com.evoke.employee.controller;
 
-import java.util.Comparator;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,8 @@ import com.evoke.employee.dto.EmployeeDTO;
 import com.evoke.employee.entity.Employee;
 import com.evoke.employee.service.DepartmentService;
 import com.evoke.employee.service.EmployeeService;
+import com.evoke.employee.utility.EmployeeExcelExporter;
+import com.evoke.employee.utility.EmployeePDFExporter;
 import io.micrometer.core.lang.NonNull;
 import io.swagger.annotations.ApiOperation;
 
@@ -52,11 +56,7 @@ public class EmployeeController {
     @ApiOperation(value = "Get All Employee Details")
     @GetMapping("/allemployees")
     public ResponseEntity<List<Employee>> getAllEmployeeDetails() throws Exception {
-
-        return new ResponseEntity<>(empService.getAllEmployeeDetails()
-                .stream()
-                .sorted(Comparator.comparing(Employee::getId))
-                .collect(Collectors.toList()), HttpStatus.OK);
+        return new ResponseEntity<>(empService.getAllEmployeeDetails(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Add Employee Details")
@@ -71,8 +71,7 @@ public class EmployeeController {
         empDTO.setDepartment(dep);
         mapper.getConfiguration()
                 .setAmbiguityIgnored(true);
-        return new ResponseEntity<>(messageSource.getMessage(empService.saveEmployeeDetails(mapper.map(empDTO, Employee.class)), new Object[] {empDTO.getEmail()}, null),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(empService.saveEmployeeDetails(mapper.map(empDTO, Employee.class)), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Update Employee Details")
@@ -135,6 +134,34 @@ public class EmployeeController {
                 });
 
         return new ResponseEntity<>(empDTOListOp, HttpStatus.OK);
+    }
+
+    @GetMapping("/employee/export/{format}")
+    public void exportToExcel(HttpServletResponse response, @NonNull @NotEmpty @PathVariable(name = "format") String format) throws Exception {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        List<Employee> listUsers = empService.getAllEmployeeDetails();
+        String DocName = "employees_" + currentDateTime;
+        if ("excel".equals(format)) {
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=" + DocName + ".xlsx";
+            response.setHeader(headerKey, headerValue);
+            EmployeeExcelExporter excelExporter = new EmployeeExcelExporter(listUsers);
+
+            excelExporter.export(response);
+        } else if ("PDF".equals(format)) {
+
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=" + DocName + ".pdf";
+            response.setHeader(headerKey, headerValue);
+            EmployeePDFExporter PDFExporter = new EmployeePDFExporter(listUsers);
+
+            PDFExporter.export(response);
+
+        }
+
     }
 
     public int validateId(String id) {

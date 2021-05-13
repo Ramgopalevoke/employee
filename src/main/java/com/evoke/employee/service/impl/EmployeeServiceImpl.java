@@ -1,13 +1,16 @@
 package com.evoke.employee.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.evoke.employee.entity.Employee;
 import com.evoke.employee.repository.DepartmentRepository;
 import com.evoke.employee.repository.EmployeeRepository;
+import com.evoke.employee.security.JwtTokenProvider;
 import com.evoke.employee.service.EmployeeService;
 
 @Service
@@ -17,11 +20,17 @@ public class EmployeeServiceImpl implements EmployeeService {
     EmployeeRepository empRepo;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
     DepartmentRepository depRepo;
 
     @Override
     public List<Employee> getAllEmployeeDetails() {
-        return empRepo.findAll();
+        return empRepo.findByOrderByIdAsc();
     }
 
     @Override
@@ -42,10 +51,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .toUpperCase(), " ",
                 emp.getLastName()
                         .toUpperCase()));
+        emp.setPassword(passwordEncoder.encode(emp.getPassword()));
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
         empRepo.save(emp);
-        return "employee.save.success";
+        var map = new HashMap<>();
+        map.put("email", emp.getEmail());
+        return jwtTokenProvider.createToken(map);
     }
 
     @Transactional
@@ -65,5 +77,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return empRepo.findByEmail(email)
                 .orElse(null);
     }
+
 
 }

@@ -1,42 +1,79 @@
 package com.evoke.employee;
 
-public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import com.evoke.employee.ExceptionHandler.ErrorResponse;
+import com.evoke.employee.controller.EmployeeController;
+import com.evoke.employee.dto.EmployeeDTO;
+
+public class EmployeeControllerUnitTests extends EmployeeApplication {
+
+
+    @LocalServerPort
+    private int port;
+
+    @Autowired(required = true)
+    private TestRestTemplate restTemplate;
+
+    @Mock
+    EmployeeController empCon;
+
+
+
+    public EmployeeDTO setInput() {
+        EmployeeDTO empDto = new EmployeeDTO();
+        empDto.setFirstName("Rohit");
+        empDto.setLastName("Sharma");
+        empDto.setEmail("rohit@evoketechnologies.com");
+        empDto.setPhone("0000000000");
+        empDto.setJoiningDate("23-apr-2021");
+        empDto.setDepId(1);
+        return empDto;
+    }
+
+    // @Sql({"classpath:data.sql"})
+    @Test
+    public void testAddEmployee() throws Exception {
+        EmployeeDTO empDto = setInput();
+        when(empCon.addEmployeeDetails(empDto)).thenReturn(new ResponseEntity<String>(HttpStatus.CREATED));
+        ResponseEntity<String> responseEntity = this.restTemplate.postForEntity("http://localhost:" + port + "/evoke/v1/employee/enroll", empDto, String.class);
+        assertEquals(201, responseEntity.getStatusCodeValue());
+    }
+
+
+    @Test
+    public void testAddEmployeeWithBadRequest() throws Exception {
+        EmployeeDTO empDto = setInput();
+        empDto.setEmail("String");
+        empDto.setPhone("String");
+        List<String> messages = new ArrayList<String>();
+        messages.add("Please enter valid phone number");
+        messages.add("Please enter valid email address");
+        ErrorResponse err = new ErrorResponse(HttpStatus.BAD_REQUEST.toString(), messages);
+
+        when(empCon.addEmployeeDetails(empDto)).thenReturn(new ResponseEntity<String>(HttpStatus.BAD_REQUEST));
+
+        ResponseEntity<ErrorResponse> responseEntity = this.restTemplate.postForEntity("http://localhost:" + port + "/evoke/v1/employee/enroll", empDto, ErrorResponse.class);
+        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(err.getError(), responseEntity.getBody()
+                .getError());
+        assertTrue(err.getMessages()
+                .containsAll(responseEntity.getBody()
+                        .getMessages()));
+    }
+
+
     /*
-     * 
-     * @LocalServerPort private int port;
-     * 
-     * @Autowired(required = true) private TestRestTemplate restTemplate;
-     * 
-     * @Mock EmployeeController empCon;
-     * 
-     * @Sql({"classpath:data.sql"})
-     * 
-     * @Test public void testAddEmployee() throws Exception { EmployeeDTO empDto = new
-     * EmployeeDTO(); empDto.setFirstName("Rohit"); empDto.setLastName("Sharma");
-     * empDto.setEmail("rohit122@evoketechnologies.com"); empDto.setPhone("0000000000");
-     * empDto.setJoiningDate("23-apr-2021"); empDto.setDepId(1);
-     * when(empCon.addEmployeeDetails(empDto)).thenReturn(new
-     * ResponseEntity<String>(HttpStatus.CREATED)); ResponseEntity<String> responseEntity =
-     * this.restTemplate.postForEntity("http://localhost:" + port + "/evoke/v1/employee/enroll",
-     * empDto, String.class); assertEquals(201, responseEntity.getStatusCodeValue()); }
-     * 
-     * 
-     * @Test public void testAddEmployeeWithBadRequest() throws Exception { EmployeeDTO empDto = new
-     * EmployeeDTO("Rohit", "Sharma", "String", "String", 1, "24-APR-2021"); List<String> messages =
-     * new ArrayList<String>(); messages.add("Please enter valid phone number");
-     * messages.add("Please enter valid email address"); ErrorResponse err = new
-     * ErrorResponse(HttpStatus.BAD_REQUEST.toString(), messages);
-     * 
-     * when(empCon.addEmployeeDetails(empDto)).thenReturn(new
-     * ResponseEntity<String>(HttpStatus.BAD_REQUEST));
-     * 
-     * ResponseEntity<ErrorResponse> responseEntity =
-     * this.restTemplate.postForEntity("http://localhost:" + port + "/evoke/v1/employee/enroll",
-     * empDto, ErrorResponse.class); assertEquals(400, responseEntity.getStatusCodeValue());
-     * assertEquals(err.getError(), responseEntity.getBody() .getError());
-     * assertEquals(err.getMessages() .size(), responseEntity.getBody() .getMessages() .size()); }
-     * 
-     * 
      * @Test public void testGetAllEmployees() throws Exception {
      * when(empCon.getAllEmployeeDetails()).thenReturn(new
      * ResponseEntity<List<Employee>>(HttpStatus.OK));
@@ -156,5 +193,6 @@ public class EmployeeControllerUnitTests extends EmployeeApplicationTests {
      * ResponseEntity<List> responseEntity = this.restTemplate.getForEntity("http://localhost:" +
      * port + "/evoke/v1/getEmpCountsByDept", List.class); assertEquals(200,
      * responseEntity.getStatusCodeValue()); }
-     * 
-     */}
+     */
+
+}

@@ -7,7 +7,7 @@ import com.evoke.employee.repository.EmployeeRepository;
 import com.evoke.employee.service.impl.DepartmentServiceImpl;
 import com.evoke.employee.service.impl.EmployeeServiceImpl;
 
-class EmployeeServiceUnitTests extends EmployeeApplicationTests {
+class EmployeeServiceUnitTests extends EmployeeApplication {
 
     @InjectMocks
     EmployeeServiceImpl empServce;

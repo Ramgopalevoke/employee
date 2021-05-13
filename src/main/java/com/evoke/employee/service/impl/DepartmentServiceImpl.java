@@ -3,10 +3,8 @@ package com.evoke.employee.service.impl;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import com.evoke.employee.ExceptionHandler.DataConstrainException;
 import com.evoke.employee.entity.Department;
 import com.evoke.employee.repository.DepartmentRepository;
 import com.evoke.employee.service.DepartmentService;
@@ -17,8 +15,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     DepartmentRepository depRepo;
 
-    @Autowired
-    private ReloadableResourceBundleMessageSource messageSource;
+    // @Autowired
+    // private ReloadableResourceBundleMessageSource messageSource;
 
     @Override
     public List<Department> getAllDepartments() throws Exception {
@@ -37,7 +35,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         try {
             depRepo.delete(dep);
         } catch (DataIntegrityViolationException e) {
-            throw new DataConstrainException(messageSource.getMessage("department.constrain.violation", new Object[] {dep.getDepId()}, null));
+            // throw new
+            // DataConstrainException(messageSource.getMessage("department.constrain.violation", new
+            // Object[] {dep.getDepId()}, null));
         }
         return "department.deleted";
     }

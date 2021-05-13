@@ -49,6 +49,8 @@ public class EmployeeDTO {
     @JsonIgnore
     private String createdBy;
 
+    private String password;
+
     public EmployeeDTO() {
         super();
     }
@@ -131,6 +133,14 @@ public class EmployeeDTO {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 
