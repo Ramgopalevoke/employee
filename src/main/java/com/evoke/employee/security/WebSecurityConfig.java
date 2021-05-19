@@ -36,6 +36,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers("/evoke/v1/signin")
                 .permitAll()
+                .antMatchers("/evoke/v1/employee/*")
+                .permitAll()
                 .anyRequest()
                 .authenticated();
 

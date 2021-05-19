@@ -1,4 +1,9 @@
 spring:
+    rabbitmq:
+        host: 13.235.108.82
+        port: 5672
+        username: appuser
+        password: appuser@123
     datasource:
           url: jdbc:postgresql://localhost:5432/EMPLOYEE_DB
           username: postgres
@@ -13,10 +18,17 @@ server:
     error:
        include-message: always
        include-binding-errors: always
-    port: 8080
+    port: 8081
 
 security:
   jwt:
     token:
       secret-key: secret-key
       expire-length: 300000
+      
+
+       
+
+jms.queue.name: 2115-queue1
+jms.topic.name: 2115-topic1
+jms.routining.name: Employee_Creation

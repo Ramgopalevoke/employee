@@ -9,7 +9,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +31,6 @@ public class EmployeeExcelExporter implements EmployeeExporter {
 
     private void writeHeaderLine() {
 
-        CreationHelper creationHelper = workbook.getCreationHelper();
         sheet = workbook.createSheet("Employees");
         Row row = sheet.createRow(0);
 
