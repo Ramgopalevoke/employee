@@ -56,8 +56,7 @@ public class EmployeeApplication implements CommandLineRunner {
             admin.setEmail("admin@email.com");
             admin.setJoiningDate("24-Apr-2021");
             admin.setPassword("admin");
-            admin.setEmail("admin@email.com");
-
+            
             empService.saveEmployeeDetails(admin);
             logger.debug("Created admin employee successfully");
 

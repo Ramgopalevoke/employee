@@ -72,7 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         emp.setPassword(passwordEncoder.encode(emp.getPassword()));
         emp.setCreatedBy("System");
         emp.setCreatedOn(new Date());
-        // empRepo.save(emp);
+        empRepo.save(emp);
 
         log.info("Sending creation message...");
         rabbitTemp.convertAndSend(topicExchangeName, routingKey, String.join("Employee created successfully with email:", " ", emp.getEmail()));
